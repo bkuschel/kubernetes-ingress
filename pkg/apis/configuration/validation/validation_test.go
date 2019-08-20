@@ -322,6 +322,37 @@ func TestValidateUpstreamsFails(t *testing.T) {
 			},
 			msg: "invalid value for ClientMaxBodySize",
 		},
+		{
+			upstreams: []v1alpha1.Upstream{
+				{
+					Name:    "upstream1",
+					Service: "test-1",
+					Port:    80,
+					ProxyBuffers: v1alpha1.Buffers{
+						Number: -1,
+						Size:   "1k",
+					},
+				},
+			},
+			expectedUpstreamNames: map[string]sets.Empty{
+				"upstream1": {},
+			},
+			msg: "invalid value for ProxyBuffers",
+		},
+		{
+			upstreams: []v1alpha1.Upstream{
+				{
+					Name:            "upstream1",
+					Service:         "test-1",
+					Port:            80,
+					ProxyBufferSize: "1k",
+				},
+			},
+			expectedUpstreamNames: map[string]sets.Empty{
+				"upstream1": {},
+			},
+			msg: "invalid value for ProxyBufferSize",
+		},
 	}
 
 	isPlus := false
@@ -1672,6 +1703,39 @@ func TestValidateSize(t *testing.T) {
 		allErrs := validateSize(test, field.NewPath("size-field"))
 		if len(allErrs) == 0 {
 			t.Errorf("validateSize(%q) didn't return error for invalid input.", test)
+		}
+	}
+}
+
+func TestValidateBuffer(t *testing.T) {
+	validbuff := v1alpha1.Buffers{Number: 8, Size: "8k"}
+	allErrs := validateBuffer(validbuff, field.NewPath("proxy_buffers"))
+
+	if len(allErrs) != 0 {
+		t.Errorf("validateBuffer returned errors %v valid input %v", allErrs, validbuff)
+	}
+
+	invalidbuff := v1alpha1.Buffers{Number: -8, Size: "15k"}
+	allErr := validateBuffer(invalidbuff, field.NewPath("proxy_buffers"))
+	if len(allErr) == 0 {
+		t.Errorf("validateBuffer(%q) didn't return error for invalid input.", invalidbuff)
+	}
+}
+
+func TestValidateBufSize(t *testing.T) {
+	var validInput = []string{"", "4k", "8k"}
+	for _, test := range validInput {
+		allErrs := validateBufSize(test, field.NewPath("proxy_buffer_size"))
+		if len(allErrs) != 0 {
+			t.Errorf("validateBufSize(%q) returned an error for valid input", test)
+		}
+	}
+
+	var invalidInput = []string{"55mm", "2mG", "6kb", "-5k", "1L"}
+	for _, test := range invalidInput {
+		allErrs := validateBufSize(test, field.NewPath("proxy_buffer_size"))
+		if len(allErrs) == 0 {
+			t.Errorf("validateBufSize(%q) didn't return error for invalid input.", test)
 		}
 	}
 }

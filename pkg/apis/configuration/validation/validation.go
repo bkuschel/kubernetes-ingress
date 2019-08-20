@@ -116,6 +116,36 @@ func validateSize(size string, fieldPath *field.Path) field.ErrorList {
 	return allErrs
 }
 
+func validateBuffer(buff v1alpha1.Buffers, fieldPath *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if (v1alpha1.Buffers{}) == buff {
+		return allErrs
+	}
+
+	if buff.Number <= 0 {
+		return append(allErrs, field.Invalid(fieldPath, buff.Number, "must be positive"))
+	}
+
+	if buff.Size == "" {
+		return append(allErrs, field.Invalid(fieldPath, buff.Size, "cannot be empty"))
+	}
+
+	if buff.Size == "4k" || buff.Size == "8k" {
+		return allErrs
+	}
+	return append(allErrs, field.Invalid(fieldPath, buff.Size, "must be 4k or 8k"))
+}
+
+func validateBufSize(size string, fieldPath *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if size == "" || size == "4k" || size == "8k" {
+		return allErrs
+	}
+	return append(allErrs, field.Invalid(fieldPath, size, "must be 4k or 8k"))
+}
+
 func validateUpstreamLBMethod(lBMethod string, fieldPath *field.Path, isPlus bool) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if lBMethod == "" {
@@ -331,6 +361,8 @@ func validateUpstreams(upstreams []v1alpha1.Upstream, fieldPath *field.Path, isP
 		allErrs = append(allErrs, validatePositiveIntOrZeroFromPointer(u.MaxConns, idxPath.Child("max-conns"))...)
 		allErrs = append(allErrs, validateSize(u.ClientMaxBodySize, idxPath.Child("client-max-body-size"))...)
 		allErrs = append(allErrs, validateUpstreamHealthCheck(u.HealthCheck, idxPath.Child("healthCheck"))...)
+		allErrs = append(allErrs, validateBuffer(u.ProxyBuffers, idxPath.Child("proxy-buffers"))...)
+		allErrs = append(allErrs, validateBufSize(u.ProxyBufferSize, idxPath.Child("proxy-buffer-size"))...)
 
 		for _, msg := range validation.IsValidPortNum(int(u.Port)) {
 			allErrs = append(allErrs, field.Invalid(idxPath.Child("port"), u.Port, msg))

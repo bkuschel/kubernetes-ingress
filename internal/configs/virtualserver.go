@@ -391,6 +391,20 @@ func generateString(s string, defaultS string) string {
 	return s
 }
 
+func generateBuffers(s conf_v1alpha1.Buffers, defaultS string) string {
+	if (conf_v1alpha1.Buffers{}) == s {
+		return defaultS
+	}
+	return fmt.Sprintf("%v %v", s.Number, s.Size)
+}
+
+func generateBool(s *bool, defaultS bool) bool {
+	if s != nil {
+		return *s
+	}
+	return defaultS
+}
+
 func generateLocation(path string, upstreamName string, upstream conf_v1alpha1.Upstream, cfgParams *ConfigParams) version2.Location {
 	return version2.Location{
 		Path:                     path,
@@ -400,9 +414,9 @@ func generateLocation(path string, upstreamName string, upstream conf_v1alpha1.U
 		ProxySendTimeout:         generateString(upstream.ProxySendTimeout, cfgParams.ProxySendTimeout),
 		ClientMaxBodySize:        generateString(upstream.ClientMaxBodySize, cfgParams.ClientMaxBodySize),
 		ProxyMaxTempFileSize:     cfgParams.ProxyMaxTempFileSize,
-		ProxyBuffering:           cfgParams.ProxyBuffering,
-		ProxyBuffers:             cfgParams.ProxyBuffers,
-		ProxyBufferSize:          cfgParams.ProxyBufferSize,
+		ProxyBuffering:           generateBool(upstream.ProxyBuffering, cfgParams.ProxyBuffering),
+		ProxyBuffers:             generateBuffers(upstream.ProxyBuffers, cfgParams.ProxyBuffers),
+		ProxyBufferSize:          generateString(upstream.ProxyBufferSize, cfgParams.ProxyBufferSize),
 		ProxyPass:                fmt.Sprintf("%v://%v", generateProxyPassProtocol(upstream.TLS.Enable), upstreamName),
 		ProxyNextUpstream:        generateString(upstream.ProxyNextUpstream, "error timeout"),
 		ProxyNextUpstreamTimeout: generateString(upstream.ProxyNextUpstreamTimeout, "0s"),

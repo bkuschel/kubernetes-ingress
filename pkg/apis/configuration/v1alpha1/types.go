@@ -39,9 +39,18 @@ type Upstream struct {
 	ProxyNextUpstream        string       `json:"next-upstream"`
 	ProxyNextUpstreamTimeout string       `json:"next-upstream-timeout"`
 	ProxyNextUpstreamTries   int          `json:"next-upstream-tries"`
+	ProxyBuffering           *bool        `json:"buffering"`
+	ProxyBuffers             Buffers      `json:"buffers"`
+	ProxyBufferSize          string       `json:"buffersize"`
 	ClientMaxBodySize        string       `json:"client-max-body-size"`
 	TLS                      UpstreamTLS  `json:"tls"`
 	HealthCheck              *HealthCheck `json:"healthCheck"`
+}
+
+//Buffers defines Buffer Configuration for an Upstream
+type Buffers struct {
+	Number int    `json:"number"`
+	Size   string `json:"size"`
 }
 
 // UpstreamTLS defines a TLS configuration for an Upstream.
