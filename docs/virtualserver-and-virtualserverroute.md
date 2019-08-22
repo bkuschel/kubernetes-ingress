@@ -221,6 +221,25 @@ tls:
 | `buffers` | Configures the buffers used for reading a response from the upstream server for a single connection. The buffers field configures the buffers used for reading a response from the upstream server for a single connection: number: 4 size: 8K . See the [proxy_buffers](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffers) directive for additional information. | `buffers` | No |
 | `buffer-size` | Sets the size of the buffer used for reading the first part of a response received from the upstream server. See the [proxy_buffer_size](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffer_size) directive. The default is set in the `proxy-buffer-size` ConfigMap key. | `string` | No |
 
+### Upstream.Buffers
+Buffers defines Buffer Configuration for an Upstream. The buffers field configures the buffers used for reading a response from the upstream server for a single connection. For example
+
+```yaml
+name: tea
+    service: tea-svc
+    port: 80
+    buffering: true
+    buffers:
+      number: 4
+      size: 8K
+    buffer-size: 16k
+```
+
+| Field | Description | Type | Required |
+| ----- | ----------- | ---- | -------- |
+| `number` | Configures the number of buffers. The default is set in the `proxy-buffers`  ConfigMap key. The default is 8 | `int` | Yes |
+| `size` | Configures the size of a buffer. The default is set in the `proxy-buffers`  ConfigMap key. Sizes can be specified in bytes, kilobytes (suffixes k and K) or megabytes (suffixes m and M), for example, “1024”, “8k”, “1m”. The default is 4k | `string` | Yes |
+
 ### Upstream.TLS
 
 | Field | Description | Type | Required |

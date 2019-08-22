@@ -96,10 +96,45 @@ func validateTime(time string, fieldPath *field.Path) field.ErrorList {
 }
 
 // http://nginx.org/en/docs/syntax.html
-const sizeFmt = `\d+[kKmMgG]?`
-const sizeErrMsg = "must consist of numeric characters followed by a valid size suffix. 'k|K|m|M|g|G"
+const offsetFmt = `\d+[kKmMgG]?`
+const offsetErrMsg = "must consist of numeric characters followed by a valid size suffix. 'k|K|m|M|g|G"
+
+var offsetRegexp = regexp.MustCompile("^" + offsetFmt + "$")
+
+func validateOffset(size string, fieldPath *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if size == "" {
+		return allErrs
+	}
+
+	if !offsetRegexp.MatchString(size) {
+		msg := validation.RegexError(offsetErrMsg, offsetFmt, "16", "32k", "64M")
+		return append(allErrs, field.Invalid(fieldPath, size, msg))
+	}
+
+	return allErrs
+}
+
+const sizeFmt = `\d+[kKmM]?`
+const sizeErrMsg = "must consist of numeric characters followed by a valid size suffix. 'k|K|m|M"
 
 var sizeRegexp = regexp.MustCompile("^" + sizeFmt + "$")
+
+func validateBuffer(buff *v1alpha1.UpstreamBuffers, fieldPath *field.Path) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	if buff == nil {
+		return allErrs
+	}
+
+	if buff.Number <= 0 {
+		return append(allErrs, field.Invalid(fieldPath, buff.Number, "must be positive"))
+	}
+
+	allErrs = validateSize(buff.Size, fieldPath)
+	return allErrs
+}
 
 func validateSize(size string, fieldPath *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
@@ -112,38 +147,7 @@ func validateSize(size string, fieldPath *field.Path) field.ErrorList {
 		msg := validation.RegexError(sizeErrMsg, sizeFmt, "16", "32k", "64M")
 		return append(allErrs, field.Invalid(fieldPath, size, msg))
 	}
-
 	return allErrs
-}
-
-func validateBuffer(buff v1alpha1.Buffers, fieldPath *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
-
-	if (v1alpha1.Buffers{}) == buff {
-		return allErrs
-	}
-
-	if buff.Number <= 0 {
-		return append(allErrs, field.Invalid(fieldPath, buff.Number, "must be positive"))
-	}
-
-	if buff.Size == "" {
-		return append(allErrs, field.Invalid(fieldPath, buff.Size, "cannot be empty"))
-	}
-
-	if buff.Size == "4k" || buff.Size == "8k" {
-		return allErrs
-	}
-	return append(allErrs, field.Invalid(fieldPath, buff.Size, "must be 4k or 8k"))
-}
-
-func validateBufSize(size string, fieldPath *field.Path) field.ErrorList {
-	allErrs := field.ErrorList{}
-
-	if size == "" || size == "4k" || size == "8k" {
-		return allErrs
-	}
-	return append(allErrs, field.Invalid(fieldPath, size, "must be 4k or 8k"))
 }
 
 func validateUpstreamLBMethod(lBMethod string, fieldPath *field.Path, isPlus bool) field.ErrorList {
@@ -359,10 +363,10 @@ func validateUpstreams(upstreams []v1alpha1.Upstream, fieldPath *field.Path, isP
 		allErrs = append(allErrs, validatePositiveIntOrZeroFromPointer(u.MaxFails, idxPath.Child("max-fails"))...)
 		allErrs = append(allErrs, validatePositiveIntOrZeroFromPointer(u.Keepalive, idxPath.Child("keepalive"))...)
 		allErrs = append(allErrs, validatePositiveIntOrZeroFromPointer(u.MaxConns, idxPath.Child("max-conns"))...)
-		allErrs = append(allErrs, validateSize(u.ClientMaxBodySize, idxPath.Child("client-max-body-size"))...)
+		allErrs = append(allErrs, validateOffset(u.ClientMaxBodySize, idxPath.Child("client-max-body-size"))...)
 		allErrs = append(allErrs, validateUpstreamHealthCheck(u.HealthCheck, idxPath.Child("healthCheck"))...)
 		allErrs = append(allErrs, validateBuffer(u.ProxyBuffers, idxPath.Child("buffers"))...)
-		allErrs = append(allErrs, validateBufSize(u.ProxyBufferSize, idxPath.Child("buffer-size"))...)
+		allErrs = append(allErrs, validateSize(u.ProxyBufferSize, idxPath.Child("buffer-size"))...)
 
 		for _, msg := range validation.IsValidPortNum(int(u.Port)) {
 			allErrs = append(allErrs, field.Invalid(idxPath.Child("port"), u.Port, msg))

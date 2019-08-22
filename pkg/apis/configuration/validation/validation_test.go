@@ -328,9 +328,9 @@ func TestValidateUpstreamsFails(t *testing.T) {
 					Name:    "upstream1",
 					Service: "test-1",
 					Port:    80,
-					ProxyBuffers: v1alpha1.Buffers{
+					ProxyBuffers: &v1alpha1.UpstreamBuffers{
 						Number: -1,
-						Size:   "1k",
+						Size:   "1G",
 					},
 				},
 			},
@@ -345,7 +345,7 @@ func TestValidateUpstreamsFails(t *testing.T) {
 					Name:            "upstream1",
 					Service:         "test-1",
 					Port:            80,
-					ProxyBufferSize: "1k",
+					ProxyBufferSize: "1G",
 				},
 			},
 			expectedUpstreamNames: map[string]sets.Empty{
@@ -1689,8 +1689,47 @@ func TestValidateTime(t *testing.T) {
 	}
 }
 
-func TestValidateSize(t *testing.T) {
+func TestValidateOffset(t *testing.T) {
 	var validInput = []string{"", "1", "10k", "11m", "1K", "100M"}
+	for _, test := range validInput {
+		allErrs := validateOffset(test, field.NewPath("size-field"))
+		if len(allErrs) != 0 {
+			t.Errorf("validateOffset(%q) returned an error for valid input", test)
+		}
+	}
+
+	var invalidInput = []string{"55mm", "2mG", "6kb", "-5k", "1L"}
+	for _, test := range invalidInput {
+		allErrs := validateOffset(test, field.NewPath("size-field"))
+		if len(allErrs) == 0 {
+			t.Errorf("validateOffset(%q) didn't return error for invalid input.", test)
+		}
+	}
+}
+
+func TestValidateBuffer(t *testing.T) {
+	validbuff := &v1alpha1.UpstreamBuffers{Number: 8, Size: "8k"}
+	allErrs := validateBuffer(validbuff, field.NewPath("buffers-field"))
+
+	if len(allErrs) != 0 {
+		t.Errorf("validateBuffer returned errors %v valid input %v", allErrs, validbuff)
+	}
+
+	invalidbuff := &v1alpha1.UpstreamBuffers{Number: -8, Size: "15G"}
+	allErrs = validateBuffer(invalidbuff, field.NewPath("buffers-field"))
+	if len(allErrs) == 0 {
+		t.Errorf("validateBuffer didn't return error %v for invalid input %v.", allErrs, invalidbuff)
+	}
+
+	invalidbuff = &v1alpha1.UpstreamBuffers{Number: 8, Size: "15G"}
+	allErrs = validateBuffer(invalidbuff, field.NewPath("buffers-field"))
+	if len(allErrs) == 0 {
+		t.Errorf("validateBuffer didn't return error %v for invalid input %v.", allErrs, invalidbuff)
+	}
+}
+
+func TestValidateSize(t *testing.T) {
+	var validInput = []string{"", "4k", "8K", "16m", "32M"}
 	for _, test := range validInput {
 		allErrs := validateSize(test, field.NewPath("size-field"))
 		if len(allErrs) != 0 {
@@ -1698,44 +1737,11 @@ func TestValidateSize(t *testing.T) {
 		}
 	}
 
-	var invalidInput = []string{"55mm", "2mG", "6kb", "-5k", "1L"}
+	var invalidInput = []string{"55mm", "2mG", "6kb", "-5k", "1L", "5G"}
 	for _, test := range invalidInput {
 		allErrs := validateSize(test, field.NewPath("size-field"))
 		if len(allErrs) == 0 {
 			t.Errorf("validateSize(%q) didn't return error for invalid input.", test)
-		}
-	}
-}
-
-func TestValidateBuffer(t *testing.T) {
-	validbuff := v1alpha1.Buffers{Number: 8, Size: "8k"}
-	allErrs := validateBuffer(validbuff, field.NewPath("proxy_buffers"))
-
-	if len(allErrs) != 0 {
-		t.Errorf("validateBuffer returned errors %v valid input %v", allErrs, validbuff)
-	}
-
-	invalidbuff := v1alpha1.Buffers{Number: -8, Size: "15k"}
-	allErr := validateBuffer(invalidbuff, field.NewPath("proxy_buffers"))
-	if len(allErr) == 0 {
-		t.Errorf("validateBuffer(%q) didn't return error for invalid input.", invalidbuff)
-	}
-}
-
-func TestValidateBufSize(t *testing.T) {
-	var validInput = []string{"", "4k", "8k"}
-	for _, test := range validInput {
-		allErrs := validateBufSize(test, field.NewPath("proxy_buffer_size"))
-		if len(allErrs) != 0 {
-			t.Errorf("validateBufSize(%q) returned an error for valid input", test)
-		}
-	}
-
-	var invalidInput = []string{"55mm", "2mG", "6kb", "-5k", "1L"}
-	for _, test := range invalidInput {
-		allErrs := validateBufSize(test, field.NewPath("proxy_buffer_size"))
-		if len(allErrs) == 0 {
-			t.Errorf("validateBufSize(%q) didn't return error for invalid input.", test)
 		}
 	}
 }

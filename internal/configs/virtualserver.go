@@ -391,8 +391,8 @@ func generateString(s string, defaultS string) string {
 	return s
 }
 
-func generateBuffers(s conf_v1alpha1.Buffers, defaultS string) string {
-	if (conf_v1alpha1.Buffers{}) == s {
+func generateBuffers(s *conf_v1alpha1.UpstreamBuffers, defaultS string) string {
+	if s == nil {
 		return defaultS
 	}
 	return fmt.Sprintf("%v %v", s.Number, s.Size)

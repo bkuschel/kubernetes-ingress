@@ -7,6 +7,7 @@ import (
 
 	"github.com/nginxinc/kubernetes-ingress/internal/configs/version2"
 	"github.com/nginxinc/kubernetes-ingress/internal/nginx"
+	"github.com/nginxinc/kubernetes-ingress/pkg/apis/configuration/v1alpha1"
 	conf_v1alpha1 "github.com/nginxinc/kubernetes-ingress/pkg/apis/configuration/v1alpha1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -933,6 +934,29 @@ func TestGenerateString(t *testing.T) {
 		result := generateString(test.inputS, "error timeout")
 		if result != test.expected {
 			t.Errorf("generateString() return %v but expected %v", result, test.expected)
+		}
+	}
+}
+
+func TestGenerateBuffer(t *testing.T) {
+	tests := []struct {
+		inputS   *v1alpha1.UpstreamBuffers
+		expected string
+	}{
+		{
+			inputS:   nil,
+			expected: "8 4k",
+		},
+		{
+			inputS:   &v1alpha1.UpstreamBuffers{Number: 8, Size: "16K"},
+			expected: "8 16K",
+		},
+	}
+
+	for _, test := range tests {
+		result := generateBuffers(test.inputS, "8 4k")
+		if result != test.expected {
+			t.Errorf("generateBuffer() return %v but expected %v", result, test.expected)
 		}
 	}
 }

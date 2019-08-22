@@ -25,29 +25,29 @@ type VirtualServerSpec struct {
 
 // Upstream defines an upstream.
 type Upstream struct {
-	Name                     string       `json:"name"`
-	Service                  string       `json:"service"`
-	Port                     uint16       `json:"port"`
-	LBMethod                 string       `json:"lb-method"`
-	FailTimeout              string       `json:"fail-timeout"`
-	MaxFails                 *int         `json:"max-fails"`
-	MaxConns                 *int         `json:"max-conns"`
-	Keepalive                *int         `json:"keepalive"`
-	ProxyConnectTimeout      string       `json:"connect-timeout"`
-	ProxyReadTimeout         string       `json:"read-timeout"`
-	ProxySendTimeout         string       `json:"send-timeout"`
-	ProxyNextUpstream        string       `json:"next-upstream"`
-	ProxyNextUpstreamTimeout string       `json:"next-upstream-timeout"`
-	ProxyNextUpstreamTries   int          `json:"next-upstream-tries"`
-	ProxyBuffering           *bool        `json:"buffering"`
-	ProxyBuffers             Buffers      `json:"buffers"`
-	ProxyBufferSize          string       `json:"buffersize"`
-	ClientMaxBodySize        string       `json:"client-max-body-size"`
-	TLS                      UpstreamTLS  `json:"tls"`
-	HealthCheck              *HealthCheck `json:"healthCheck"`
+	Name                     string           `json:"name"`
+	Service                  string           `json:"service"`
+	Port                     uint16           `json:"port"`
+	LBMethod                 string           `json:"lb-method"`
+	FailTimeout              string           `json:"fail-timeout"`
+	MaxFails                 *int             `json:"max-fails"`
+	MaxConns                 *int             `json:"max-conns"`
+	Keepalive                *int             `json:"keepalive"`
+	ProxyConnectTimeout      string           `json:"connect-timeout"`
+	ProxyReadTimeout         string           `json:"read-timeout"`
+	ProxySendTimeout         string           `json:"send-timeout"`
+	ProxyNextUpstream        string           `json:"next-upstream"`
+	ProxyNextUpstreamTimeout string           `json:"next-upstream-timeout"`
+	ProxyNextUpstreamTries   int              `json:"next-upstream-tries"`
+	ProxyBuffering           *bool            `json:"buffering"`
+	ProxyBuffers             *UpstreamBuffers `json:"buffers"`
+	ProxyBufferSize          string           `json:"buffer-size"`
+	ClientMaxBodySize        string           `json:"client-max-body-size"`
+	TLS                      UpstreamTLS      `json:"tls"`
+	HealthCheck              *HealthCheck     `json:"healthCheck"`
 }
 
-//Buffers defines Buffer Configuration for an Upstream
+//UpstreamBuffers defines Buffer Configuration for an Upstream
 type UpstreamBuffers struct {
 	Number int    `json:"number"`
 	Size   string `json:"size"`
