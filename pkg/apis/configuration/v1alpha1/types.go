@@ -48,7 +48,7 @@ type Upstream struct {
 }
 
 //Buffers defines Buffer Configuration for an Upstream
-type Buffers struct {
+type UpstreamBuffers struct {
 	Number int    `json:"number"`
 	Size   string `json:"size"`
 }
