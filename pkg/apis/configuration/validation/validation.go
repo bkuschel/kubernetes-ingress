@@ -361,7 +361,7 @@ func validateUpstreams(upstreams []v1alpha1.Upstream, fieldPath *field.Path, isP
 		allErrs = append(allErrs, validatePositiveIntOrZeroFromPointer(u.MaxConns, idxPath.Child("max-conns"))...)
 		allErrs = append(allErrs, validateSize(u.ClientMaxBodySize, idxPath.Child("client-max-body-size"))...)
 		allErrs = append(allErrs, validateUpstreamHealthCheck(u.HealthCheck, idxPath.Child("healthCheck"))...)
-		allErrs = append(allErrs, validateBuffer(u.ProxyBuffers, idxPath.Child("proxy-buffers"))...)
+		allErrs = append(allErrs, validateBuffer(u.ProxyBuffers, idxPath.Child("buffers"))...)
 		allErrs = append(allErrs, validateBufSize(u.ProxyBufferSize, idxPath.Child("buffer-size"))...)
 
 		for _, msg := range validation.IsValidPortNum(int(u.Port)) {
