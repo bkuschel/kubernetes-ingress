@@ -238,7 +238,7 @@ name: tea
 | Field | Description | Type | Required |
 | ----- | ----------- | ---- | -------- |
 | `number` | Configures the number of buffers. The default is set in the `proxy-buffers` ConfigMap key.  | `int` | Yes |
-| `size` | Configures the size of a buffer. The default is set in the `proxy-buffers`  ConfigMap key. Sizes can be specified in bytes, kilobytes (suffixes k and K) or megabytes (suffixes m and M), for example, “1024”, “8k”, “1m”. The default is 4k | `string` | Yes |
+| `size` | Configures the size of a buffer. The default is set in the `proxy-buffers` ConfigMap key.  | `string` | Yes |
 
 ### Upstream.TLS
 
