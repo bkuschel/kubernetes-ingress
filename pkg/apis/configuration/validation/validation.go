@@ -101,7 +101,7 @@ const offsetErrMsg = "must consist of numeric characters followed by a valid siz
 
 var offsetRegexp = regexp.MustCompile("^" + offsetFmt + "$")
 
-func validateOffset(size string, fieldPath *field.Path) field.ErrorList {
+func validateOffset(offset string, fieldPath *field.Path) field.ErrorList {
 	allErrs := field.ErrorList{}
 
 	if size == "" {
